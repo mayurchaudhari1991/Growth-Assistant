@@ -15,7 +15,11 @@ async function runPipeline() {
   const content = await AIService.generateLinkedInPost(article);
   console.log("[Pipeline] LinkedIn post generated");
 
-  const image = await ImageService.fetchImage(article.title, article.summary);
+  const image = await ImageService.fetchImage(
+    article.title,
+    article.summary,
+    content,
+  );
   console.log(`[Pipeline] Image fetched: ${image.url}`);
 
   const post = await Post.create({

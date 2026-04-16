@@ -2,30 +2,41 @@
  * Builds a Gemma-optimized prompt to generate a LinkedIn post from an article
  */
 function buildLinkedInPostPrompt(article) {
-  return `Write a LinkedIn post in English about this article. Use ONLY plain text — never use ** or __ for anything.
+  return `Write a detailed LinkedIn post for software developers about this article. The reader should understand what the article is about WITHOUT clicking the link.
 
 Article: ${article.title}
 Summary: ${article.summary || article.contentSnippet || "No summary available"}
 
-Write the post now using this exact structure. No markdown, no ** or ##, plain text only:
+Write 300-400 words following this structure:
 
-[emoji] [Hook: 1 sharp sentence about what happened in this article that would surprise a developer]
+1. [EMOJI] One sharp hook sentence about the main topic (what problem it solves)
 
-[4-5 sentences: explain what was done, how it works, and why developers should care. Include specific technical details from the article. Be informative and direct.]
+2. [2-3 sentences] What this technology/tool actually does, explained simply
 
-[2-3 sentences: what this changes or enables for engineers, companies, or the industry.]
+3. [2-3 sentences] How it works under the hood or what makes it different from existing solutions
 
-Key takeaways:
-🔹 [technical insight 1 from the article — be specific]
-🔹 [technical insight 2 from the article — be specific]
-🔹 [technical insight 3 from the article — be specific]
-🔹 [technical insight 4 from the article — be specific]
+4. [2-3 sentences] Why developers should care — real use cases and who benefits most
 
-[1 thought-provoking question that invites engineers to share their experience or opinion in the comments]
+5. Key technical takeaways:
+🔹 [Specific detail about implementation or architecture]
+🔹 [Specific detail about performance or scalability]
+🔹 [Specific detail about integration or adoption]
+🔹 [Specific limitation or trade-off to know]
 
-[10-12 relevant hashtags on one line, no blank line before them]
+6. [2-3 sentences] Your practical opinion on whether this is ready for production use
 
-IMPORTANT: Write plain English sentences only. Zero asterisks. Zero hashtags in the body. Zero markdown. Start immediately with the emoji hook.
+7. [One question] asking developers if they have tried this or plan to
+
+8. [8-10 hashtags] mix of broad tech tags and specific topic tags
+
+STRICT RULES — VIOLATING THESE WILL REJECT THE OUTPUT:
+- Minimum 300 words, maximum 400 words
+- NEVER use these words: mind-blowing, amazing, incredible, awesome, game-changing, revolutionary, shocked, blew my mind, blown away, 🤯🔥🚀 emojis in body (only one emoji at the very start)
+- NEVER use double emojis like 🔥🔥🔥 or 🤯🤯🤯
+- NEVER use phrases like "I spent the last few days" unless you actually did
+- NEVER ask "Guess what?" or "Did you hear?"
+- Write like a senior engineer sharing genuine technical insight, not a hype marketer
+- Explain the technical concept so clearly that someone who hasn't read the article understands it
 
 Post:`;
 }

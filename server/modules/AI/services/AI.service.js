@@ -45,7 +45,7 @@ class AIService {
         options: {
           temperature: 0.8,
           top_p: 0.9,
-          num_predict: 900,
+          num_predict: 600,
         },
       },
       { timeout: 120000 },
