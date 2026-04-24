@@ -25,6 +25,11 @@ module.exports = {
     model: process.env.OLLAMA_MODEL,
   },
 
+  groq: {
+    apiKey: process.env.GROQ_API_KEY || "",
+    model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+  },
+
   unsplash: {
     accessKey: process.env.UNSPLASH_ACCESS_KEY || "",
   },

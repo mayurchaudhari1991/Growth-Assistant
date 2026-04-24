@@ -6,14 +6,17 @@ const PostService = require("../../modules/Posts/services/Post.service");
 const Post = require("../../modules/Posts/models/Post.model");
 const { CRON_SCHEDULE } = require("../../lib/config/constants");
 
+// Helper to prevent terminal-breaking characters (\r) from RSS feeds
+const scrub = (str) => String(str).replace(/[\r\n]+/g, " ").trim();
+
 async function runPipeline() {
   console.log("[Pipeline] Starting content pipeline run...");
 
   const article = await NewsService.fetchFreshArticle();
-  console.log(`[Pipeline] Article fetched: "${article.title}"`);
+  console.log(`[Pipeline] Article fetched: "${scrub(article.title)}"`);
 
-  const content = await AIService.generateLinkedInPost(article);
-  console.log("[Pipeline] LinkedIn post generated");
+  const { text: content, style } = await AIService.generateLinkedInPost(article);
+  console.log(`[Pipeline] AI complete with style: ${style}`);
 
   const image = await ImageService.fetchImage(
     article.title,
@@ -25,6 +28,7 @@ async function runPipeline() {
   const post = await Post.create({
     title: article.title,
     content,
+    style,
     imageUrl: image.url,
     imageCredit: image.credit,
     imageCreditUrl: image.creditUrl,

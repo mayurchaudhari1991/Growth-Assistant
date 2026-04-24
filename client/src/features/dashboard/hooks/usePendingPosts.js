@@ -3,7 +3,12 @@ import { fetchPendingPosts, fetchStats } from "../api/dashboard.api.js";
 
 export default function usePendingPosts() {
   const [posts, setPosts] = useState([]);
-  const [stats, setStats] = useState({ pending: 0, posted: 0, skipped: 0, total: 0 });
+  const [stats, setStats] = useState({
+    pending: 0,
+    posted: 0,
+    skipped: 0,
+    total: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
@@ -30,6 +35,12 @@ export default function usePendingPosts() {
   useEffect(() => {
     load(page);
   }, [load, page]);
+
+  useEffect(() => {
+    const handleCreated = () => load(1);
+    window.addEventListener("post-created", handleCreated);
+    return () => window.removeEventListener("post-created", handleCreated);
+  }, [load]);
 
   const refresh = () => load(page);
 

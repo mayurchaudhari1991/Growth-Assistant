@@ -3,6 +3,7 @@ import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import Topbar from "./Topbar.jsx";
 import Sidebar from "./Sidebar.jsx";
+import CustomPostModal from "../../features/dashboard/components/CustomPostModal.jsx";
 
 const DRAWER_WIDTH = 240;
 
@@ -10,12 +11,27 @@ export default function DashboardLayout() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const handleToggle = () => setMobileOpen((prev) => !prev);
 
+  const handlePostCreated = () => {
+    window.dispatchEvent(new Event("post-created"));
+  };
+
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
-      <Topbar drawerWidth={DRAWER_WIDTH} onMenuClick={handleToggle} />
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        bgcolor: "background.default",
+      }}
+    >
+      <Topbar
+        drawerWidth={DRAWER_WIDTH}
+        onMenuClick={handleToggle}
+        onCreatePost={() => setCreateModalOpen(true)}
+      />
       <Sidebar
         drawerWidth={DRAWER_WIDTH}
         mobileOpen={mobileOpen}
@@ -33,6 +49,12 @@ export default function DashboardLayout() {
       >
         <Outlet />
       </Box>
+
+      <CustomPostModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onPostCreated={handlePostCreated}
+      />
     </Box>
   );
 }

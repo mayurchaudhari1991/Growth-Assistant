@@ -75,8 +75,8 @@ export default function DashboardPage() {
     setTriggering(true);
     try {
       await triggerPipeline();
-      showSnackbar("Pipeline triggered! New draft is being generated...", "success");
-      setTimeout(refresh, 3000);
+      showSnackbar("Success! New draft generated.", "success");
+      refresh(); // Instant refresh after API returns
     } catch (err) {
       showSnackbar(err.message, "error");
     } finally {

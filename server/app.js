@@ -5,6 +5,15 @@ const { connectRedis } = require("./loaders/redis");
 const { setupExpress } = require("./loaders/express");
 const { startCronJobs } = require("./cron/jobs/contentPipeline.job");
 
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('\n[Fatal] Unhandled Rejection at:', promise, '\nReason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('\n[Fatal] Uncaught Exception thrown:', err);
+  process.exit(1);
+});
+
 async function bootstrap() {
   const app = express();
 

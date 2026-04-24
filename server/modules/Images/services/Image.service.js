@@ -24,10 +24,13 @@ const FALLBACK_IMAGES = [
 class ImageService {
   // Build a search query that balances article topic with visual keywords
   _buildSearchQuery(title, summary = "", postContent = "") {
-    // Use post content if available (more focused), otherwise title+summary
-    const text = postContent
-      ? `${title} ${postContent.substring(0, 500)}`
-      : `${title} ${summary}`.toLowerCase();
+    // Normalize text: handle fancy quotes, lowercase, and strip non-alphanumeric
+    const normalizedText = (postContent ? `${title} ${postContent}` : `${title} ${summary}`)
+      .toLowerCase()
+      .replace(/[‘’“”"]/g, " ") // specifically handle fancy quotes
+      .replace(/[^a-z0-9\s]/g, " ");
+
+    const text = normalizedText;
 
     // Extract core topic words (keep it simple and visual)
     const topicWords = text

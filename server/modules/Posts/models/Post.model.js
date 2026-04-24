@@ -25,7 +25,7 @@ const postSchema = new mongoose.Schema(
     },
     sourceUrl: {
       type: String,
-      required: true,
+      default: "",
     },
     sourceTitle: {
       type: String,
@@ -44,6 +44,16 @@ const postSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    style: {
+      type: String,
+      default: "deep_dive",
+    },
+    engagement: {
+      likes: { type: Number, default: 0 },
+      comments: { type: Number, default: 0 },
+      shares: { type: Number, default: 0 },
+      lastSyncedAt: { type: Date, default: null },
+    },
     postedAt: {
       type: Date,
       default: null,
@@ -51,7 +61,7 @@ const postSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 postSchema.index({ status: 1, createdAt: -1 });

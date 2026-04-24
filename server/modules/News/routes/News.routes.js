@@ -5,7 +5,11 @@ const { runPipeline } = require("../../../cron/jobs/contentPipeline.job");
 router.post("/trigger", async (req, res, next) => {
   try {
     const post = await runPipeline();
-    res.json({ success: true, message: "Pipeline triggered", post });
+    res.json({
+      success: true,
+      message: "New draft generated successfully!",
+      post,
+    });
   } catch (err) {
     next(err);
   }
