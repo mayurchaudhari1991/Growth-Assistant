@@ -25,6 +25,7 @@ import {
   fetchLinkedInStatus,
   fetchAiHealth,
   fetchStats,
+  fetchSchedules,
 } from "../api/settings.api.js";
 import { useSearchParams } from "react-router-dom";
 
@@ -35,6 +36,7 @@ export default function SettingsPage() {
   const [linkedinStatus, setLinkedinStatus] = useState(null);
   const [aiHealth, setAiHealth] = useState(null);
   const [stats, setStats] = useState(null);
+  const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,10 +53,11 @@ export default function SettingsPage() {
   useEffect(() => {
     async function loadAll() {
       setLoading(true);
-      const [li, ai, st] = await Promise.allSettled([
+      const [li, ai, st, sc] = await Promise.allSettled([
         fetchLinkedInStatus(),
         fetchAiHealth(),
         fetchStats(),
+        fetchSchedules(),
       ]);
       setLinkedinStatus(li.status === "fulfilled" ? li.value : null);
       setAiHealth(
@@ -63,10 +66,13 @@ export default function SettingsPage() {
           : { healthy: false, error: "Cannot reach server" },
       );
       setStats(st.status === "fulfilled" ? st.value?.stats : null);
+      setSchedules(sc.status === "fulfilled" ? sc.value?.schedules : []);
       setLoading(false);
     }
     loadAll();
   }, []);
+
+  const activeSchedulesCount = schedules.filter(s => s.isActive).length;
 
   return (
     <Box>
@@ -168,19 +174,30 @@ export default function SettingsPage() {
                   <ListItemIcon sx={{ minWidth: 36 }}>
                     <ScheduleIcon
                       fontSize="small"
-                      sx={{ color: "warning.main" }}
+                      sx={{ color: activeSchedulesCount > 0 ? "success.main" : "warning.main" }}
                     />
                   </ListItemIcon>
                   <ListItemText
                     primary="Scheduler"
-                    secondary="Runs every 6 hours (0 */6 * * *)"
+                    secondary={activeSchedulesCount > 0 
+                      ? `${activeSchedulesCount} active windows (Custom)`
+                      : "No active slots configured"}
                     primaryTypographyProps={{
                       variant: "body2",
                       fontWeight: 500,
                     }}
-                    secondaryTypographyProps={{ variant: "caption" }}
+                    secondaryTypographyProps={{ 
+                      variant: "caption",
+                      color: activeSchedulesCount > 0 ? "success.main" : "warning.main"
+                    }}
                   />
+                  {activeSchedulesCount > 0 ? (
+                    <CheckCircleIcon fontSize="small" color="success" />
+                  ) : (
+                    <ErrorIcon fontSize="small" color="warning" />
+                  )}
                 </ListItem>
+
               </List>
             </CardContent>
           </Card>

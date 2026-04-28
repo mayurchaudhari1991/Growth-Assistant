@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchPendingPosts, fetchStats } from "../api/dashboard.api.js";
+import { fetchPendingPosts, fetchStats } from "../api/content.api.js";
+
 
 export default function usePendingPosts() {
   const [posts, setPosts] = useState([]);

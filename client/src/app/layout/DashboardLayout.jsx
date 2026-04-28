@@ -3,9 +3,10 @@ import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import Topbar from "./Topbar.jsx";
 import Sidebar from "./Sidebar.jsx";
-import CustomPostModal from "../../features/dashboard/components/CustomPostModal.jsx";
+import CustomPostModal from "../../features/content/components/CustomPostModal.jsx";
 
 const DRAWER_WIDTH = 240;
+
 
 export default function DashboardLayout() {
   const theme = useTheme();

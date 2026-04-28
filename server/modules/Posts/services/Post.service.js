@@ -92,8 +92,46 @@ class PostService {
       Post.countDocuments({ status: "posted" }),
       Post.countDocuments({ status: "skipped" }),
     ]);
-    return { pending, posted, skipped, total: pending + posted + skipped };
+
+    const realFollowers = await LinkedInService.getFollowerCount();
+
+    // Mocking analytics data until LinkedIn API for stats is integrated
+    // In a production app, these would come from the LinkedIn Analytics API or a separate metrics collection
+    const analytics = {
+      reach: { value: "12.4K", trend: 12 },
+      followers: { value: realFollowers != null ? realFollowers.toLocaleString() : "2,840", trend: 8 },
+
+      engagementRate: { value: "4.2%", trend: 24 },
+
+      activeJobs: { value: pending },
+      weeklyEngagement: [
+        { name: "Mon", value: 400 }, { name: "Tue", value: 300 }, { name: "Wed", value: 600 },
+        { name: "Thu", value: 800 }, { name: "Fri", value: 500 }, { name: "Sat", value: 900 },
+        { name: "Sun", value: 1100 },
+      ],
+      contentStrategy: [
+        { name: "AI Tech", value: 45, color: "#6366f1" },
+        { name: "Development", value: 25, color: "#ec4899" },
+        { name: "Career", value: 20, color: "#8b5cf6" },
+        { name: "Networking", value: 10, color: "#10b981" },
+      ],
+      growthMetrics: [
+        { name: "Jan", followers: 120, reach: 2400 },
+        { name: "Feb", followers: 210, reach: 3500 },
+        { name: "Mar", followers: 450, reach: 6800 },
+        { name: "Apr", followers: 890, reach: 12400 },
+      ]
+    };
+
+    return { 
+      pending, 
+      posted, 
+      skipped, 
+      total: pending + posted + skipped,
+      ...analytics
+    };
   }
+
 }
 
 module.exports = new PostService();

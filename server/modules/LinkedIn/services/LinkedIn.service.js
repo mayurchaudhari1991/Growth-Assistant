@@ -132,7 +132,31 @@ class LinkedInService {
     return postId;
   }
 
+  async getFollowerCount() {
+    const token = env.linkedin.accessToken;
+    const personUrn = env.linkedin.personUrn;
+    if (!token || !personUrn) return null;
+
+    try {
+      const encodedUrn = encodeURIComponent(personUrn);
+      const response = await axios.get(
+        `${LINKEDIN_REST_BASE}/networkSizes/${encodedUrn}?edgeType=FOLLOWED_BY`,
+        { headers: restHeaders(token) }
+      );
+      return response.data?.firstDegreeSize || 0;
+    } catch (err) {
+      if (err.response?.status === 403) {
+        console.warn("[LinkedIn] Follower count access denied. This API requires 'Marketing Developer Platform' or 'Community Management' permissions in your LinkedIn App.");
+      } else {
+        console.warn("[LinkedIn] Failed to fetch follower count:", err.response?.data || err.message);
+      }
+      return null;
+    }
+
+  }
+
   async _uploadImage(imageUrl, accessToken, personUrn) {
+
     try {
       const initRes = await axios.post(
         `${LINKEDIN_REST_BASE}/images?action=initializeUpload`,

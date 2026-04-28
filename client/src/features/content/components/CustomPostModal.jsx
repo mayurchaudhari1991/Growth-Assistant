@@ -14,7 +14,9 @@ import {
 } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
-import { customGeneratePost } from "../api/dashboard.api";
+import { customGeneratePost } from "../api/content.api.js";
+
+
 
 const EXAMPLES = [
   "Why callback functions are essential in JavaScript async programming",

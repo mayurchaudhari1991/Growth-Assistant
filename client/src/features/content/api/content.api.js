@@ -22,3 +22,8 @@ export const triggerPipeline = () =>
 
 export const customGeneratePost = (prompt) =>
   api.post("/ai/custom-generate", { prompt }).then((r) => r.data);
+
+export const generatePost = () =>
+  api.post("/posts/ai-generate").then((r) => r.data);
+
+

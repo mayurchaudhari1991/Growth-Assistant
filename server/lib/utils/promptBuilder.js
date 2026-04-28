@@ -67,7 +67,7 @@ STRICT WRITING RULES:
 - ORGANIC FLOW: No headers, no labels (The Fix:, Verdict:). Just natural, technical paragraphs.
 - TONE: Professional, measured, and technical. Avoid marketing fluff like "game-changer" or "incredible".
 - EMOJI BAN: EXACTLY ONE emoji at the start. 🔹 for bullets. NO OTHER EMOJIS.
-- HASHTAGS: Exactly 5 targeted hashtags at the end.
+- HASHTAGS: Exactly 10 targeted hashtags at the end.
 
 Post:`;
 }

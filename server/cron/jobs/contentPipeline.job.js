@@ -53,20 +53,45 @@ async function autoPublishPendingPost() {
   console.log(`[AutoPublish] Published successfully.`);
 }
 
-// Returns 3 random { hour, minute } in morning / afternoon / evening windows
-function generateDailyPostTimes() {
-  const windows = [
-    { start: 8, end: 11 }, // Morning 8–11 AM
-    { start: 13, end: 16 }, // Afternoon 1–4 PM
-    { start: 19, end: 22 }, // Evening 7–10 PM
-  ];
-  return windows.map(({ start, end }) => ({
-    hour: start + Math.floor(Math.random() * (end - start)),
+const Schedule = require("../../modules/Schedules/models/Schedule.model");
+
+
+// Returns random { hour, minute } in morning / afternoon / evening windows from DB
+async function generateDailyPostTimes() {
+  const windows = await Schedule.find({ isActive: true });
+  
+  // Fallback to default if DB is empty (seeding should have happened via service)
+  if (windows.length === 0) {
+    return [
+      { hour: 9, minute: 30 },
+      { hour: 14, minute: 15 },
+      { hour: 20, minute: 45 },
+    ];
+  }
+
+  return windows.map(({ startTime, endTime }) => ({
+    hour: startTime + Math.floor(Math.random() * (endTime - startTime)),
     minute: Math.floor(Math.random() * 60),
   }));
 }
 
-let todayPostTimes = generateDailyPostTimes();
+let todayPostTimes = [];
+
+// Initialize times on startup
+(async () => {
+  try {
+    todayPostTimes = await generateDailyPostTimes();
+    console.log("[AutoPublish] Today's posting times generated:");
+    todayPostTimes.forEach(({ hour, minute }, i) => {
+       const h = String(hour).padStart(2, "0");
+       const m = String(minute).padStart(2, "0");
+       console.log(`[AutoPublish] Slot ${i + 1}: ${h}:${m}`);
+    });
+  } catch (err) {
+    console.error("[AutoPublish] Failed to init times:", err.message);
+  }
+})();
+
 
 function logScheduledTimes() {
   todayPostTimes.forEach(({ hour, minute }, i) => {
@@ -93,11 +118,12 @@ function startCronJobs() {
   });
 
   // Refresh random post times at midnight each day
-  cron.schedule("0 0 * * *", () => {
-    todayPostTimes = generateDailyPostTimes();
+  cron.schedule("0 0 * * *", async () => {
+    todayPostTimes = await generateDailyPostTimes();
     console.log("[AutoPublish] New daily post times generated:");
     logScheduledTimes();
   });
+
 
   // Check every minute if it is time to publish
   cron.schedule("* * * * *", async () => {
