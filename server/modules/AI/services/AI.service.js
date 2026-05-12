@@ -18,38 +18,40 @@ function cleanMarkdown(text) {
 
 class AIService {
   async generateLinkedInPost(article) {
-    const cacheKey = `${REDIS_KEYS.AI_CACHE_PREFIX}${article.sourceUrl}`;
+    const styles = Object.keys(POST_STYLES);
+    const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+    const styleInfo = POST_STYLES[randomStyle];
+
+    const cacheKey = `${REDIS_KEYS.AI_CACHE_PREFIX}${article.sourceUrl}:${randomStyle}`;
     const redis = getRedisClient();
 
     try {
       const cached = await redis.get(cacheKey);
       if (cached) {
-        console.log("[AI] Cache hit for article:", article.title);
+        console.log(`[AI] Cache hit for article: ${article.title} (Style: ${randomStyle})`);
         try {
           return JSON.parse(cached);
         } catch {
-          return { text: cached, style: "unknown" };
+          return { text: cached, style: randomStyle };
         }
       }
     } catch {
       // Redis unavailable
     }
 
-    const styles = Object.keys(POST_STYLES);
-    const randomStyle = styles[Math.floor(Math.random() * styles.length)];
     const prompt = buildLinkedInPostPrompt(article, randomStyle);
     let generatedText = "";
 
     // Prefer Groq for sub-second speed and high intelligence if API key is present
     if (env.groq.apiKey) {
       try {
-        console.log(`[AI] Generating post using Groq (${env.groq.model})...`);
+        console.log(`[AI] Generating post using Groq (${env.groq.model}) with style: ${randomStyle}...`);
         const response = await axios.post(
           "https://api.groq.com/openai/v1/chat/completions",
           {
             model: env.groq.model,
             messages: [{ role: "user", content: prompt }],
-            temperature: 0.7,
+            temperature: 0.8, // Slightly higher for more variety
             max_tokens: 1000,
           },
           {
@@ -68,7 +70,7 @@ class AIService {
 
     // Fallback to local Ollama if Groq is missing or fails
     if (!generatedText) {
-      console.log(`[AI] Generating post using Ollama (${env.ollama.model})...`);
+      console.log(`[AI] Generating post using Ollama (${env.ollama.model}) with style: ${randomStyle}...`);
       const response = await axios.post(
         `${env.ollama.url}/api/generate`,
         {
@@ -76,9 +78,9 @@ class AIService {
           prompt,
           stream: false,
           options: {
-            temperature: 0.7,
+            temperature: 0.8,
             top_p: 0.9,
-            num_predict: 500,
+            num_predict: 600,
           },
         },
         { timeout: 120000 },
@@ -91,8 +93,11 @@ class AIService {
     }
 
     const cleanedText = cleanMarkdown(generatedText);
-    const result = { text: cleanedText, style: randomStyle };
-    const scrubLog = (s) => String(s).replace(/[\r\n]+/g, " ").trim();
+    const result = { 
+      text: cleanedText, 
+      style: randomStyle,
+      target: styleInfo.target 
+    };
 
     try {
       await redis.set(
@@ -105,53 +110,81 @@ class AIService {
       // Redis unavailable
     }
 
-    console.log(`[AI] Post generated successfully. Length: ${generatedText.length} chars`);
+    console.log(`[AI] Post generated successfully (${randomStyle}). Length: ${generatedText.length} chars`);
     return result;
   }
 
+
   async generateFromPrompt(userPrompt) {
-    const prompt = `Write a detailed LinkedIn post for software developers and tech professionals based on this idea:
+    const styles = Object.keys(POST_STYLES);
+    const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+    const styleInfo = POST_STYLES[randomStyle];
 
-"${userPrompt}"
+    const prompt = `Write a high-signal LinkedIn post.
+Topic/Idea: "${userPrompt}"
+Focus: ${styleInfo.name}
 
-Write 250-350 words following this structure:
+Structure to use (STRICTLY DO NOT include labels or headers):
+${styleInfo.structure}
 
-1. [EMOJI] One sharp hook sentence about the main topic
-
-2. [2-3 sentences] Context or explanation of what this is about
-
-3. [2-3 sentences] Why developers or tech professionals should care
-
-4. Key takeaways:
-🔹 [Specific insight or tip]
-🔹 [Specific insight or tip]
-🔹 [Specific insight or tip]
-🔹 [Specific insight or tip]
-
-5. [2 sentences] Practical advice or call to action
-
-6. [One question] inviting readers to share their experience
-
-7. [8-10 relevant hashtags]
-
-RULES: Plain text only, no asterisks, no markdown, no hype words, short punchy sentences, start with one emoji hook only.
+STRICT WRITING RULES:
+- PERSPECTIVE: Write as an industry expert who understands high-level technical and business dynamics.
+- TONE: Professional, authoritative, and sophisticated.
+- NO DIRECT NAMING: DO NOT use words like "CEO", "HR", "Recruiter", "Recruitment", "Candidate", or "Job Seeker" in the post body. Attract them through the relevance of the content, not by naming their roles.
+- NO META-REFERENCES: Do not say "Based on the prompt" or "I think".
+- ORGANIC FLOW: No headers, no labels. Just natural paragraphs.
+- EMOJI BAN: EXACTLY ONE emoji at the start. 🔹 for bullets. NO OTHER EMOJIS.
+- HASHTAGS: Exactly 10 targeted hashtags at the end including tags relevant to ${styleInfo.target}.
 
 Post:`;
 
-    const response = await axios.post(
-      `${env.ollama.url}/api/generate`,
-      {
-        model: env.ollama.model,
-        prompt,
-        stream: false,
-        options: { temperature: 0.7, top_p: 0.9, num_predict: 500 },
-      },
-      { timeout: 120000 },
-    );
 
-    const raw = response.data?.response?.trim();
-    if (!raw) throw new Error("Ollama returned empty response");
-    return cleanMarkdown(raw);
+    let generatedText = "";
+
+    // Prefer Groq
+    if (env.groq.apiKey) {
+      try {
+        console.log(`[AI] Generating custom post using Groq (${env.groq.model}) with style: ${randomStyle}...`);
+        const response = await axios.post(
+          "https://api.groq.com/openai/v1/chat/completions",
+          {
+            model: env.groq.model,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.8,
+            max_tokens: 1000,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${env.groq.apiKey}`,
+              "Content-Type": "application/json",
+            },
+            timeout: 30000,
+          },
+        );
+        generatedText = response.data.choices[0].message.content;
+      } catch (err) {
+        console.error("[AI] Groq failed for custom prompt:", err.message);
+      }
+    }
+
+    // Fallback to Ollama
+    if (!generatedText) {
+      console.log(`[AI] Generating custom post using Ollama (${env.ollama.model}) with style: ${randomStyle}...`);
+      const response = await axios.post(
+        `${env.ollama.url}/api/generate`,
+        {
+          model: env.ollama.model,
+          prompt,
+          stream: false,
+          options: { temperature: 0.8, top_p: 0.9, num_predict: 600 },
+        },
+        { timeout: 120000 },
+      );
+      generatedText = response.data?.response?.trim();
+    }
+
+    if (!generatedText) throw new Error("AI service returned empty response");
+    return cleanMarkdown(generatedText);
   }
 
   async checkOllamaHealth() {
@@ -165,3 +198,4 @@ Post:`;
 }
 
 module.exports = new AIService();
+
