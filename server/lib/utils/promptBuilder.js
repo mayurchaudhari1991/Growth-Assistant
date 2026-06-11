@@ -88,15 +88,23 @@ const POST_STYLES = {
 - Focus on the synergy between strategy, hiring, and execution.
 - Include a 🔹 list of 4 key takeaways that bridge the gap between business and talent.
 - Last line: Ask a question that invites a multi-disciplinary discussion.`,
-  }
+  },
 };
-
 
 /**
  * Builds a persona-driven, engagement-optimized prompt
  */
 function buildLinkedInPostPrompt(article, styleKey = "deep_dive") {
   const style = POST_STYLES[styleKey] || POST_STYLES.deep_dive;
+  const hookStyles = [
+    "Contrarian: challenge a common belief in one sentence",
+    "Mistake-first: point out a costly mistake most teams make",
+    "Outcome-first: reveal an unexpected result or impact",
+    "Prediction-first: bold but reasoned prediction about what happens next",
+    "Question-hook: sharp question that creates immediate curiosity",
+  ];
+  const selectedHookStyle =
+    hookStyles[Math.floor(Math.random() * hookStyles.length)];
 
   return `Write a high-signal LinkedIn post.
 Topic: ${article.title}
@@ -107,8 +115,13 @@ Article Reference:
 Title: ${article.title}
 Context: ${article.summary || article.contentSnippet || "Focus on the key insights of this topic."}
 
-Structure to use (STRICTLY DO NOT include labels or headers):
+CONTENT INTENT (use as guidance, NOT as a fixed template):
 ${style.structure}
+
+OPENING HOOK (MOST IMPORTANT):
+- The first line must be scroll-stopping and curiosity-driven.
+- Use this hook style for this post: ${selectedHookStyle}
+- Avoid generic openings. Do NOT start with weak lines like "Today I read..." or "Here is an update...".
 
 STRICT WRITING RULES:
 - PERSPECTIVE: Write as an industry expert who understands high-level technical and business dynamics.
@@ -116,13 +129,13 @@ STRICT WRITING RULES:
 - NO DIRECT NAMING: DO NOT use words like "CEO", "HR", "Recruiter", "Recruitment", "Candidate", or "Job Seeker" in the post body. Attract them through the relevance of the content, not by naming their roles.
 - NO DICTIONARY DEFINITIONS: Do NOT explain basics. Assume professional knowledge.
 - NO META-REFERENCES: Do NOT say "In this article" or "The author says". Adopt the knowledge.
-- ORGANIC FLOW: No headers, no labels. Just natural paragraphs.
+- FORMAT FREEDOM: Do NOT follow a fixed section-by-section format. Keep it natural and varied post to post.
+- ORGANIC FLOW: No headers, no labels. Use a mix of short punchy lines + concise paragraphs.
 - EMOJI BAN: EXACTLY ONE emoji at the start. 🔹 for bullets. NO OTHER EMOJIS.
-- HASHTAGS: Exactly 10 targeted hashtags at the end including tags relevant to ${style.target}.
+- CAPTION + HASHTAGS: Keep the main content format flexible, but always end with a concise caption-style closing and 8-12 trending relevant hashtags.
 
 Post:`;
 }
-
 
 /**
  * Builds a simple keyword extraction prompt
@@ -138,5 +151,3 @@ Keywords:`;
 }
 
 module.exports = { buildLinkedInPostPrompt, buildKeywordPrompt, POST_STYLES };
-
-

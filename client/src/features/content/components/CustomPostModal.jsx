@@ -16,8 +16,6 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
 import { customGeneratePost } from "../api/content.api.js";
 
-
-
 const EXAMPLES = [
   "Why callback functions are essential in JavaScript async programming",
   "How I built a rate limiter for my Node.js API from scratch",
@@ -40,7 +38,10 @@ export default function CustomPostModal({ open, onClose, onPostCreated }) {
       setPrompt("");
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to generate post. Make sure Ollama is running.");
+      setError(
+        err.response?.data?.message ||
+          "Failed to generate post. Make sure Ollama is running.",
+      );
     } finally {
       setLoading(false);
     }
@@ -64,7 +65,8 @@ export default function CustomPostModal({ open, onClose, onPostCreated }) {
 
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Describe your idea, topic, or insight in a few words or sentences. The AI will generate a full LinkedIn post from it.
+          Describe your idea, topic, or insight in a few words or sentences. The
+          AI will generate a full LinkedIn post from it.
         </Typography>
 
         <TextField
@@ -78,13 +80,15 @@ export default function CustomPostModal({ open, onClose, onPostCreated }) {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           disabled={loading}
-          inputProps={{ maxLength: 500 }}
-          helperText={`${prompt.length}/500`}
+          inputProps={{ maxLength: 5000 }}
+          helperText={`${prompt.length}/5000`}
         />
 
         <Box sx={{ mt: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 1 }}>
-            <LightbulbOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+            <LightbulbOutlinedIcon
+              sx={{ fontSize: 14, color: "text.secondary" }}
+            />
             <Typography variant="caption" color="text.secondary">
               Try one of these:
             </Typography>
@@ -112,7 +116,17 @@ export default function CustomPostModal({ open, onClose, onPostCreated }) {
         )}
 
         {loading && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 2, p: 1.5, bgcolor: "action.hover", borderRadius: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              mt: 2,
+              p: 1.5,
+              bgcolor: "action.hover",
+              borderRadius: 1,
+            }}
+          >
             <CircularProgress size={18} />
             <Typography variant="body2" color="text.secondary">
               Generating your LinkedIn post... this takes ~30 seconds
@@ -129,7 +143,13 @@ export default function CustomPostModal({ open, onClose, onPostCreated }) {
           variant="contained"
           onClick={handleGenerate}
           disabled={!prompt.trim() || loading}
-          startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <AutoAwesomeIcon />}
+          startIcon={
+            loading ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : (
+              <AutoAwesomeIcon />
+            )
+          }
         >
           {loading ? "Generating..." : "Generate Post"}
         </Button>
